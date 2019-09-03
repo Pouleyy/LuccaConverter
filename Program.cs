@@ -67,12 +67,44 @@ namespace LuccaConverter {
                 }
                 listCurrency = new HashSet<String> (listCurrencyWithDouble).ToList ();
                 var graph = CreateGraph ();
+                var shortestPath = ShortestPath (graph, startingCurrency, endingCurrency);
         static MyGraph<string> CreateGraph () {
             var edges = new List<Tuple<string, string>> ();
             foreach (var item in infoConversion) {
                 edges.Add (Tuple.Create (item.Item1, item.Item2));
             }
             return new MyGraph<string> (listCurrency, edges);
+        }
+
+        static IEnumerable<T> ShortestPath<T> (MyGraph<T> graph, T start, T end) {
+            var previous = new Dictionary<T, T> ();
+
+            var queue = new Queue<T> ();
+            queue.Enqueue (start);
+
+            while (queue.Count > 0) {
+                var vertex = queue.Dequeue ();
+                foreach (var neighbor in graph.AdjacencyList[vertex]) {
+                    if (previous.ContainsKey (neighbor))
+                        continue;
+
+                    previous[neighbor] = vertex;
+                    queue.Enqueue (neighbor);
+                }
+            }
+
+            var path = new List<T> { };
+
+            var current = end;
+            while (!current.Equals (start)) {
+                path.Add (current);
+                current = previous[current];
+            };
+
+            path.Add (start);
+            path.Reverse ();
+
+            return path;
         }
     }
 }
