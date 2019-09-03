@@ -68,6 +68,10 @@ namespace LuccaConverter {
                 listCurrency = new HashSet<String> (listCurrencyWithDouble).ToList ();
                 var graph = CreateGraph ();
                 var shortestPath = ShortestPath (graph, startingCurrency, endingCurrency);
+                ComputeChange (shortestPath);
+            }
+        }
+
         static MyGraph<string> CreateGraph () {
             var edges = new List<Tuple<string, string>> ();
             foreach (var item in infoConversion) {
@@ -105,6 +109,24 @@ namespace LuccaConverter {
             path.Reverse ();
 
             return path;
+        }
+
+        static void ComputeChange(IEnumerable<string> shortestPath) {
+            var listPath = shortestPath.ToList();
+            var amount = amountToChange;
+            for(var i = 0; i < shortestPath.Count() - 1; i++) {
+                var convertFrom = listPath[i];
+                var convertTo = listPath[i+1];
+                var conversion = infoConversion.First(item => (item.Item1 == convertFrom && item.Item2 == convertTo) || (item.Item2 == convertFrom && item.Item1 == convertTo));
+                if(conversion.Item1 == convertFrom) {
+                    amount = Math.Round(amount*conversion.Item3, 4);
+                } else {
+                    var changeRate = Math.Round(1/conversion.Item3, 4);
+                    amount = Math.Round(amount*changeRate, 4);
+                }
+            }
+            var result = Math.Round(amount, 0);
+            Console.WriteLine(result.ToString());
         }
     }
 }
