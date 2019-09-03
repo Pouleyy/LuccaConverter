@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -37,6 +37,11 @@ namespace LuccaConverter {
         static void Main (string[] args) {
             if (args[0] != null) {
                 StreamFile (args[0]);
+                var graph = CreateGraph ();
+                var shortestPath = ShortestPath (graph, startingCurrency, endingCurrency);
+                var result = ComputeChange (shortestPath);
+                Console.WriteLine (result.ToString ());
+
             } else {
                 Console.WriteLine ("Error, you need to specify a path to the file");
             }
@@ -66,9 +71,6 @@ namespace LuccaConverter {
                     count++;
                 }
                 listCurrency = new HashSet<String> (listCurrencyWithDouble).ToList ();
-                var graph = CreateGraph ();
-                var shortestPath = ShortestPath (graph, startingCurrency, endingCurrency);
-                ComputeChange (shortestPath);
             }
         }
 
@@ -111,22 +113,21 @@ namespace LuccaConverter {
             return path;
         }
 
-        static void ComputeChange(IEnumerable<string> shortestPath) {
-            var listPath = shortestPath.ToList();
+        static double ComputeChange (IEnumerable<string> shortestPath) {
+            var listPath = shortestPath.ToList ();
             var amount = amountToChange;
-            for(var i = 0; i < shortestPath.Count() - 1; i++) {
+            for (var i = 0; i < shortestPath.Count () - 1; i++) {
                 var convertFrom = listPath[i];
-                var convertTo = listPath[i+1];
-                var conversion = infoConversion.First(item => (item.Item1 == convertFrom && item.Item2 == convertTo) || (item.Item2 == convertFrom && item.Item1 == convertTo));
-                if(conversion.Item1 == convertFrom) {
-                    amount = Math.Round(amount*conversion.Item3, 4);
+                var convertTo = listPath[i + 1];
+                var conversion = infoConversion.First (item => (item.Item1 == convertFrom && item.Item2 == convertTo) || (item.Item2 == convertFrom && item.Item1 == convertTo));
+                if (conversion.Item1 == convertFrom) {
+                    amount = Math.Round (amount * conversion.Item3, 4);
                 } else {
-                    var changeRate = Math.Round(1/conversion.Item3, 4);
-                    amount = Math.Round(amount*changeRate, 4);
+                    var changeRate = Math.Round (1 / conversion.Item3, 4);
+                    amount = Math.Round (amount * changeRate, 4);
                 }
             }
-            var result = Math.Round(amount, 0);
-            Console.WriteLine(result.ToString());
+            return Math.Round (amount, 0);
         }
     }
 }
