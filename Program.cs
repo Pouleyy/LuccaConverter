@@ -66,7 +66,13 @@ namespace LuccaConverter {
                     count++;
                 }
                 listCurrency = new HashSet<String> (listCurrencyWithDouble).ToList ();
+                var graph = CreateGraph ();
+        static MyGraph<string> CreateGraph () {
+            var edges = new List<Tuple<string, string>> ();
+            foreach (var item in infoConversion) {
+                edges.Add (Tuple.Create (item.Item1, item.Item2));
             }
+            return new MyGraph<string> (listCurrency, edges);
         }
     }
 }
